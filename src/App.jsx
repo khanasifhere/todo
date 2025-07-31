@@ -1,8 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Save, X, User, Phone, Mail, Search, Filter } from 'lucide-react';
 
 export default function ContactTodoApp() {
-  const [contacts, setContacts] = useState([]);
+  const [contacts, setContacts] = useState(() => {
+    try {
+      const savedContacts = localStorage.getItem('contacts');
+      return savedContacts ? JSON.parse(savedContacts) : [];
+    } catch (error) {
+      console.error("Error parsing contacts from localStorage", error);
+      return [];
+    }
+  });
+
+  useEffect(() => {
+    localStorage.setItem('contacts', JSON.stringify(contacts));
+  }, [contacts]);
+
+
   const [editingId, setEditingId] = useState(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [formData, setFormData] = useState({
@@ -24,7 +38,6 @@ export default function ContactTodoApp() {
       ...formData,
       [name]: value
     });
-    // Clear error for this field when user starts typing
     if (errors[name]) {
       setErrors({
         ...errors,
@@ -38,28 +51,24 @@ export default function ContactTodoApp() {
     const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     const phoneRegex = /^[0-9]{10}$/;
 
-    // Name validation
     if (!formData.name.trim()) {
       newErrors.name = 'Name is required';
     } else if (formData.name.length > 15) {
       newErrors.name = 'Name must be 15 characters or less';
     }
 
-    // Phone validation
     if (!formData.phone.trim()) {
       newErrors.phone = 'Phone number is required';
     } else if (!phoneRegex.test(formData.phone)) {
       newErrors.phone = 'Phone number must be exactly 10 digits';
     }
 
-    // Email validation
     if (!formData.email.trim()) {
       newErrors.email = 'Email is required';
     } else if (!emailRegex.test(formData.email)) {
       newErrors.email = 'Please enter a valid email address';
     }
 
-    // Notes validation
     if (!formData.notes.trim()) {
       newErrors.notes = 'Notes are required';
     } else {
@@ -99,8 +108,8 @@ export default function ContactTodoApp() {
 
   const handleUpdate = () => {
     if (validateForm()) {
-      setContacts(contacts.map(contact => 
-        contact.id === editingId 
+      setContacts(contacts.map(contact =>
+        contact.id === editingId
           ? { ...contact, ...formData }
           : contact
       ));
@@ -122,15 +131,15 @@ export default function ContactTodoApp() {
   };
 
   const filteredContacts = contacts.filter(contact => {
-    const nameMatch = searchFilters.name === '' || 
+    const nameMatch = searchFilters.name === '' ||
       contact.name.toLowerCase().includes(searchFilters.name.toLowerCase());
-    
-    const phoneMatch = searchFilters.phone === '' || 
+
+    const phoneMatch = searchFilters.phone === '' ||
       contact.phone.includes(searchFilters.phone);
-    
-    const emailMatch = searchFilters.email === '' || 
+
+    const emailMatch = searchFilters.email === '' ||
       contact.email.toLowerCase().includes(searchFilters.email.toLowerCase());
-    
+
     return nameMatch && phoneMatch && emailMatch;
   });
 
@@ -164,7 +173,6 @@ export default function ContactTodoApp() {
           </button>
         </div>
 
-        {/* Add/Edit Form */}
         {(showAddForm || editingId) && (
           <div className="bg-gray-50 p-6 rounded-lg mb-6 border-2 border-blue-200">
             <h2 className="text-xl font-semibold mb-4 text-gray-700">
@@ -263,15 +271,13 @@ export default function ContactTodoApp() {
           </div>
         )}
 
-        {/* Search and Filter Section */}
         <div className="bg-gray-50 p-4 rounded-lg mb-6">
           <h3 className="text-lg font-semibold text-gray-700 mb-4 flex items-center gap-2">
             <Search size={20} />
             Search Contacts
           </h3>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Name Search */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Search by Name
@@ -296,7 +302,6 @@ export default function ContactTodoApp() {
               )}
             </div>
 
-            {/* Phone Search */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Search by Phone
@@ -321,7 +326,6 @@ export default function ContactTodoApp() {
               )}
             </div>
 
-            {/* Email Search */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Search by Email
@@ -347,7 +351,6 @@ export default function ContactTodoApp() {
             </div>
           </div>
 
-          {/* Filter Summary and Clear All */}
           {hasActiveFilters && (
             <div className="mt-4 p-3 bg-white rounded-md border border-gray-200">
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
@@ -372,7 +375,6 @@ export default function ContactTodoApp() {
           )}
         </div>
 
-        {/* Contacts List */}
         <div className="space-y-4">
           {filteredContacts.length === 0 && contacts.length === 0 ? (
             <div className="text-center py-12">
@@ -448,7 +450,6 @@ export default function ContactTodoApp() {
           )}
         </div>
 
-        {/* Stats */}
         {contacts.length > 0 && (
           <div className="mt-6 p-4 bg-blue-50 rounded-lg">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-2">
