@@ -63,7 +63,7 @@ export default function ContactTodoApp() {
     if (!formData.notes.trim()) {
       newErrors.notes = 'Notes are required';
     } else {
-      const wordCount = formData.notes.trim().split(/\s+/).length;
+      const wordCount = formData.notes.length;
       if (wordCount > 50) {
         newErrors.notes = 'Notes must be 50 words or less';
       }
@@ -232,6 +232,7 @@ export default function ContactTodoApp() {
                   value={formData.notes}
                   onChange={handleInputChange}
                   rows="3"
+                  maxLength="50"
                   className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                     errors.notes ? 'border-red-500' : 'border-gray-300'
                   }`}
@@ -239,7 +240,7 @@ export default function ContactTodoApp() {
                 />
                 {errors.notes && <p className="text-red-500 text-xs mt-1">{errors.notes}</p>}
                 <p className="text-gray-400 text-xs mt-1">
-                  {formData.notes.trim() ? formData.notes.trim().split(/\s+/).length : 0}/50 words
+                  {formData.notes.length ? formData.notes.length : 0}/50 words
                 </p>
               </div>
             </div>
